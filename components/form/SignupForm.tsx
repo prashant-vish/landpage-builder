@@ -16,6 +16,8 @@ import {
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import GoogleSignInButton from "../GoogleSignInButton";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 const FormSchema = z
   .object({
@@ -32,6 +34,7 @@ const FormSchema = z
   });
 
 const SigninForm = () => {
+  const router = useRouter();
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -42,8 +45,45 @@ const SigninForm = () => {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof FormSchema>) => {
-    console.log(values);
+  const onSubmit = async (values: z.infer<typeof FormSchema>) => {
+    const response = await fetch("/api/user", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username: values.username,
+        email: values.email,
+        password: values.password,
+      }),
+    });
+    if (response.ok) {
+      toast.success("Congratulations! Signup Successfull!", {
+        duration: 2000,
+        style: {
+          backgroundColor: "green",
+          color: "white",
+        },
+        action: {
+          label: "✖",
+          onClick: () => toast.dismiss(),
+        },
+      });
+      router.push("/signin");
+    } else {
+      toast.error("Registration Failed!", {
+        duration: 2000,
+        style: {
+          backgroundColor: "red",
+          color: "white",
+        },
+        action: {
+          label: "✖",
+          onClick: () => toast.dismiss(),
+        },
+      });
+      console.log("Registration failed");
+    }
   };
   return (
     <Form {...form}>

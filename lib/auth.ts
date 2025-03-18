@@ -75,7 +75,6 @@ export const authOptions: NextAuthOptions = {
           username: token.username,
         },
       };
-      return session;
     },
   },
 };

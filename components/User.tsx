@@ -4,7 +4,7 @@ import React from "react";
 
 const User = () => {
   const { data: session } = useSession();
-  return <pre>{JSON.stringify(session)}</pre>;
+  return <div>{JSON.stringify(session)}</div>;
 };
 
 export default User;

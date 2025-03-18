@@ -9,7 +9,7 @@ const admin = async () => {
       <div className="text-2xl">
         Admin Page - Welcome Back{" "}
         <span className="text-green-300 font-extrabold">
-          {session?.user.username}
+          {session?.user.username || session?.user.name}
         </span>
       </div>
     );

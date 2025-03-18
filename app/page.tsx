@@ -7,7 +7,7 @@ import Link from "next/link";
 export default async function Home() {
   const session = await getServerSession(authOptions);
   return (
-    <div className="text-2xl">
+    <div className="text-xl">
       Home --&nbsp;
       <Link className={buttonVariants()} href={"/admin"}>
         Go To Admin
@@ -15,7 +15,7 @@ export default async function Home() {
       <h2>Client Session</h2>
       <User />
       <h2>Server Session</h2>
-      {JSON.stringify(session)}
+      <div>{JSON.stringify(session)}</div>
     </div>
   );
 }

@@ -4,11 +4,16 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 
+type RouteContext = {
+  params: {
+    chatId: string;
+  };
+};
+
 export async function GET(
   req: NextRequest,
-  context: { params: { chatId: string } }
+  context: RouteContext
 ) {
-  const params = context.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session || !session.user) {
@@ -16,7 +21,7 @@ export async function GET(
     }
 
     const userId = session.user.id;
-    const chatId = params.chatId;
+    const chatId = context.params.chatId;
 
     const chat = await db.chat.findUnique({
       where: {
@@ -36,7 +41,6 @@ export async function GET(
       return NextResponse.json({ message: "Chat not found" }, { status: 404 });
     }
 
-    // app/api/chat/[chatId]/route.ts (continued)
     return NextResponse.json(chat);
   } catch (error) {
     console.error("Chat detail error:", error);
@@ -49,7 +53,7 @@ export async function GET(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { chatId: string } }
+  context: RouteContext
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -58,7 +62,7 @@ export async function DELETE(
     }
 
     const userId = session.user.id;
-    const chatId = params.chatId;
+    const chatId = context.params.chatId;
 
     // Check if the chat belongs to the user
     const chat = await db.chat.findUnique({

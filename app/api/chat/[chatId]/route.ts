@@ -8,8 +8,9 @@ const prisma = new PrismaClient();
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { chatId: string } }
+  context: { params: { chatId: string } }
 ) {
+  const params = context.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session || !session.user) {

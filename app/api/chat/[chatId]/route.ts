@@ -4,15 +4,9 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 
-type RouteContext = {
-  params: {
-    chatId: string;
-  };
-};
-
 export async function GET(
-  req: NextRequest,
-  context: RouteContext
+  request: Request,
+  { params }: { params: Promise<{ ChatId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -21,8 +15,7 @@ export async function GET(
     }
 
     const userId = session.user.id;
-    const chatId = context.params.chatId;
-
+    const chatId = (await params).ChatId;
     const chat = await db.chat.findUnique({
       where: {
         id: chatId,
@@ -52,8 +45,8 @@ export async function GET(
 }
 
 export async function DELETE(
-  req: NextRequest,
-  context: RouteContext
+  request: Request,
+  { params }: { params: Promise<{ ChatId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -62,7 +55,7 @@ export async function DELETE(
     }
 
     const userId = session.user.id;
-    const chatId = context.params.chatId;
+    const chatId = (await params).ChatId;
 
     // Check if the chat belongs to the user
     const chat = await db.chat.findUnique({

@@ -1,14 +1,12 @@
 // app/components/ChatInterface.tsx
 "use client";
 import { useState, useRef, useEffect } from "react";
-import { useAIState, useUIState, useActions } from "ai/rsc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 
-// Define the message type
 type Message = {
   role: "user" | "assistant" | "system";
   content: string;
@@ -21,11 +19,8 @@ export default function ChatInterface({ chatId }: { chatId?: string }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const previewRef = useRef<HTMLIFrameElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  // State for messages
   const [messages, setMessages] = useState<Message[]>([]);
 
-  // Load chat history when chatId changes
   useEffect(() => {
     const loadChatHistory = async () => {
       if (!chatId) {
@@ -38,7 +33,6 @@ export default function ChatInterface({ chatId }: { chatId?: string }) {
         if (!response.ok) throw new Error("Failed to fetch chat");
         const data = await response.json();
         setMessages(data.messages);
-        // Extract HTML from the last assistant message
         const assistantMessages = data.messages.filter(
           (msg: Message) => msg.role === "assistant"
         );
@@ -59,9 +53,7 @@ export default function ChatInterface({ chatId }: { chatId?: string }) {
     loadChatHistory();
   }, [chatId]);
 
-  // Extract HTML code from message content
   const extractHtmlFromMessage = (content: string): string => {
-    // Look for code blocks or HTML content
     const htmlMatch =
       content.match(/```html\s*([\s\S]*?)\s*```/) ||
       content.match(/<!DOCTYPE html>[\s\S]*<\/html>/);
@@ -73,12 +65,10 @@ export default function ChatInterface({ chatId }: { chatId?: string }) {
     return "";
   };
 
-  // Scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Function to download HTML content
   const downloadHtml = () => {
     if (!previewHtml) return;
     const blob = new Blob([previewHtml], { type: "text/html" });
@@ -92,20 +82,17 @@ export default function ChatInterface({ chatId }: { chatId?: string }) {
     URL.revokeObjectURL(url);
   };
 
-  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!input.trim() || isSubmitting) return;
 
-    // Add user message to state immediately
     const userMessage: Message = { role: "user", content: input };
     const updatedMessages = [...messages, userMessage];
     setMessages(updatedMessages);
     setIsSubmitting(true);
 
     try {
-      // Make API request
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: {
@@ -119,7 +106,6 @@ export default function ChatInterface({ chatId }: { chatId?: string }) {
 
       if (!response.ok) throw new Error("Failed to send message");
 
-      // Stream the response
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       let assistantMessage = "";
@@ -132,7 +118,6 @@ export default function ChatInterface({ chatId }: { chatId?: string }) {
           const chunk = decoder.decode(value, { stream: true });
           assistantMessage += chunk;
 
-          // Update with partial message
           setMessages([
             ...updatedMessages,
             { role: "assistant", content: assistantMessage },
@@ -140,14 +125,12 @@ export default function ChatInterface({ chatId }: { chatId?: string }) {
         }
       }
 
-      // Extract HTML after receiving complete response
       const htmlContent = extractHtmlFromMessage(assistantMessage);
       if (htmlContent) {
         setPreviewHtml(htmlContent);
         setActiveTab("preview");
       }
 
-      // Clear input
       setInput("");
     } catch (error) {
       console.error("Error sending message:", error);
@@ -164,7 +147,7 @@ export default function ChatInterface({ chatId }: { chatId?: string }) {
         className="flex-1 flex flex-col"
       >
         <div className="border-b p-4">
-          <TabsList className="mb-4">
+          <TabsList className="mb-4 flex flex-wrap gap-2">
             <TabsTrigger value="chat">Chat</TabsTrigger>
             <TabsTrigger value="preview">Preview</TabsTrigger>
             <TabsTrigger value="code">Code</TabsTrigger>
@@ -268,7 +251,10 @@ export default function ChatInterface({ chatId }: { chatId?: string }) {
         </TabsContent>
       </Tabs>
       <div className="border-t p-4">
-        <form onSubmit={handleSubmit} className="flex gap-2">
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col sm:flex-row gap-2"
+        >
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}

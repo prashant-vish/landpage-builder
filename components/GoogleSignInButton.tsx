@@ -10,7 +10,7 @@ const GoogleSignInButton = ({ children }: GoogleSignInButtonProps) => {
   const loginwithGoogle = async () => {
     try {
       setIsLoading(true);
-      await signIn("google", { callbackUrl: "/admin" });
+      await signIn("google", { callbackUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/admin` });
     } catch (error) {
       setIsLoading(false);
     } finally {

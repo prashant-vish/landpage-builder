@@ -2,9 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { db } from "@/lib/db";
 
 export async function GET(
   req: NextRequest,
@@ -20,7 +18,7 @@ export async function GET(
     const userId = session.user.id;
     const chatId = params.chatId;
 
-    const chat = await prisma.chat.findUnique({
+    const chat = await db.chat.findUnique({
       where: {
         id: chatId,
         userId,
@@ -63,7 +61,7 @@ export async function DELETE(
     const chatId = params.chatId;
 
     // Check if the chat belongs to the user
-    const chat = await prisma.chat.findUnique({
+    const chat = await db.chat.findUnique({
       where: {
         id: chatId,
         userId,
@@ -75,7 +73,7 @@ export async function DELETE(
     }
 
     // Delete the chat and its messages (cascade delete is set up in the schema)
-    await prisma.chat.delete({
+    await db.chat.delete({
       where: {
         id: chatId,
       },
